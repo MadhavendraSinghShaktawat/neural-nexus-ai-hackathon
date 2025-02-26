@@ -5,7 +5,9 @@ import {
   PaperAirplaneIcon, 
   MicrophoneIcon,
   TrashIcon,
-  XMarkIcon
+  XMarkIcon,
+  SpeakerWaveIcon,
+  SpeakerXMarkIcon
 } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import classNames from 'classnames';
@@ -89,6 +91,14 @@ export const ChatPage: React.FC = () => {
   // Add state for delete confirmation modal
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Add state for speech recognition and synthesis
+  const [isListening, setIsListening] = useState(false);
+  const [isSpeaking, setIsSpeaking] = useState(false);
+  const [speechEnabled, setSpeechEnabled] = useState(false);
+  
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
+  const synthRef = useRef<SpeechSynthesis | null>(null);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -187,6 +197,112 @@ export const ChatPage: React.FC = () => {
     setInputMessage(textarea.value);
   };
 
+  // Check if speech recognition and synthesis are supported
+  useEffect(() => {
+    if ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognitionAPI();
+      
+      if (recognitionRef.current) {
+        recognitionRef.current.continuous = false;
+        recognitionRef.current.interimResults = true;
+        recognitionRef.current.lang = 'en-US';
+        
+        recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+          const transcript = event.results[0][0].transcript;
+          setInputMessage(transcript);
+          
+          // Auto-adjust textarea height
+          if (inputRef.current) {
+            inputRef.current.style.height = 'auto';
+            inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`;
+          }
+          
+          // If this is a final result, auto-send after a short delay
+          if (event.results[0].isFinal) {
+            // Wait a moment to ensure the user has finished speaking
+            setTimeout(() => {
+              if (transcript.trim()) {
+                // Create a synthetic form submit event
+                const formEvent = new Event('submit', { cancelable: true }) as unknown as React.FormEvent;
+                handleSendMessage(formEvent);
+              }
+            }, 1000); // 1 second delay to ensure user has finished speaking
+          }
+        };
+        
+        recognitionRef.current.onend = () => {
+          setIsListening(false);
+        };
+        
+        recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
+          console.error('Speech recognition error', event.error);
+          setIsListening(false);
+        };
+        
+        setSpeechEnabled(true);
+      }
+    }
+    
+    if ('speechSynthesis' in window) {
+      synthRef.current = window.speechSynthesis;
+    }
+    
+    return () => {
+      // Clean up speech recognition
+      if (recognitionRef.current) {
+        recognitionRef.current.abort();
+      }
+      
+      // Clean up speech synthesis
+      if (synthRef.current && synthRef.current.speaking) {
+        synthRef.current.cancel();
+      }
+    };
+  }, []);
+
+  const handleVoiceInput = () => {
+    if (!recognitionRef.current) return;
+    
+    if (isListening) {
+      recognitionRef.current.abort();
+      setIsListening(false);
+    } else {
+      setIsListening(true);
+      recognitionRef.current.start();
+    }
+  };
+  
+  const speakText = (text: string) => {
+    if (!synthRef.current) return;
+    
+    // Stop any ongoing speech
+    if (synthRef.current.speaking) {
+      synthRef.current.cancel();
+    }
+    
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+    utterance.volume = 1.0;
+    
+    utterance.onstart = () => setIsSpeaking(true);
+    utterance.onend = () => setIsSpeaking(false);
+    utterance.onerror = (event) => {
+      console.error('Speech synthesis error', event);
+      setIsSpeaking(false);
+    };
+    
+    synthRef.current.speak(utterance);
+  };
+  
+  const stopSpeaking = () => {
+    if (synthRef.current && synthRef.current.speaking) {
+      synthRef.current.cancel();
+      setIsSpeaking(false);
+    }
+  };
+
   const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputMessage.trim() || isLoading) return;
@@ -232,10 +348,14 @@ export const ChatPage: React.FC = () => {
         const updated = prev.map(msg =>
           msg.id === newMessage.id ? updatedMessage : msg
         );
-        // Update localStorage with new messages
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
         return updated;
       });
+
+      // Speak the response
+      if (data.response) {
+        speakText(data.response);
+      }
 
     } catch (error) {
       console.error('Error sending message:', error);
@@ -395,7 +515,7 @@ export const ChatPage: React.FC = () => {
                           <motion.div 
                             initial={{ opacity: 0, scale: 0.9 }}
                             animate={{ opacity: 1, scale: 1 }}
-                            className="bg-white rounded-2xl rounded-tl-none px-6 py-4 max-w-[80%] md:max-w-[60%] shadow-sm"
+                            className="bg-white rounded-2xl rounded-tl-none px-6 py-4 max-w-[80%] md:max-w-[60%] shadow-sm relative"
                           >
                             {msg.isLoading ? (
                               <div className="flex gap-2 py-2">
@@ -404,7 +524,27 @@ export const ChatPage: React.FC = () => {
                                 <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce [animation-delay:0.4s]" />
                               </div>
                             ) : (
-                              <p className="text-gray-800 whitespace-pre-wrap break-words">{msg.response}</p>
+                              <>
+                                <p className="text-gray-800 whitespace-pre-wrap break-words pr-8">{msg.response}</p>
+                                {synthRef.current && (
+                                  <button
+                                    onClick={() => isSpeaking ? stopSpeaking() : speakText(msg.response || '')}
+                                    className={classNames(
+                                      "absolute top-4 right-4 p-1.5 rounded-full",
+                                      isSpeaking && msg.id === messages[messages.length - 1].id
+                                        ? "bg-primary-100 text-primary-500"
+                                        : "text-gray-400 hover:text-gray-600 hover:bg-gray-100"
+                                    )}
+                                    aria-label={isSpeaking ? "Stop speaking" : "Speak message"}
+                                  >
+                                    {isSpeaking && msg.id === messages[messages.length - 1].id ? (
+                                      <SpeakerXMarkIcon className="w-4 h-4" />
+                                    ) : (
+                                      <SpeakerWaveIcon className="w-4 h-4" />
+                                    )}
+                                  </button>
+                                )}
+                              </>
                             )}
                           </motion.div>
                         </div>
@@ -431,19 +571,30 @@ export const ChatPage: React.FC = () => {
                 ref={inputRef}
                 value={inputMessage}
                 onChange={handleTextAreaHeight}
-                placeholder="Type your message..."
+                placeholder={isListening ? "Listening..." : "Type your message..."}
                 rows={1}
                 className={classNames(
-                  "w-full px-4 py-3 pr-12 rounded-2xl border border-gray-200",
+                  "w-full px-4 py-3 pr-12 rounded-2xl border",
+                  isListening 
+                    ? "border-primary-500 bg-primary-50" 
+                    : "border-gray-200",
                   "focus:outline-none focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20",
                   "resize-none max-h-[120px] min-h-[48px]"
                 )}
-                disabled={isLoading}
+                disabled={isLoading || isListening}
               />
               <button
                 type="button"
-                className="absolute right-3 bottom-3 p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                aria-label="Voice input"
+                onClick={handleVoiceInput}
+                disabled={!speechEnabled || isLoading}
+                className={classNames(
+                  "absolute right-3 bottom-3 p-1.5 rounded-full transition-colors",
+                  isListening 
+                    ? "bg-primary-100 text-primary-500 animate-pulse" 
+                    : "text-gray-400 hover:text-gray-600",
+                  "disabled:opacity-50 disabled:cursor-not-allowed"
+                )}
+                aria-label={isListening ? "Stop listening" : "Voice input"}
               >
                 <MicrophoneIcon className="w-5 h-5" />
               </button>
