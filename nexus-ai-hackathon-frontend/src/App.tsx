@@ -5,6 +5,7 @@ import { ChatPage } from './pages/chat-page'
 import { VideoChatPage } from './pages/video-chat-page'
 import MoodTrackerPage from './pages/mood-tracker-page'
 import MoodHistoryPage from './pages/mood-history-page'
+import ParentDashboardPage from './pages/parent-dashboard-page'
 import './App.css'
 
 const App: React.FC = () => {
@@ -15,6 +16,7 @@ const App: React.FC = () => {
       <Route path="/video-chat" element={<VideoChatPage />} />
       <Route path="/mood-tracker" element={<MoodTrackerPage />} />
       <Route path="/mood-history" element={<MoodHistoryPage />} />
+      <Route path="/parent-dashboard" element={<ParentDashboardPage />} />
     </Routes>
   )
 }
