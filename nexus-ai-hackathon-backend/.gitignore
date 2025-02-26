@@ -1,0 +1,30 @@
+# Node modules
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Environment variables
+.env
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+
+# IDE specific files
+.vscode/
+.idea/
+
+# TypeScript specific files
+*.tsbuildinfo
+
+# Coverage directory used by tools like istanbul
+coverage/
+
+# Jest test results
+jest-test-results.json

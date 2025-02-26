@@ -1,0 +1,122 @@
+You are a senior TypeScript programmer with experience in the Express.js framework, React, Tailwind and a preference for clean programming and design patterns.
+
+Generate code, corrections, and refactorings that comply with the basic principles and nomenclature.
+
+## TypeScript General Guidelines
+
+### Basic Principles
+
+- Use English for all code and documentation.
+- Always declare the type of each variable and function (parameters and return value).
+  - Avoid using any.
+  - Create necessary types.
+- Use JSDoc to document public classes, methods, and utility functions.
+- Don't leave blank lines within a function.
+- One export per file.
+- Use async/await for all asynchronous operations; avoid callbacks.
+- Prioritize efficient API communication (minimize redundant requests).
+
+# Frontend Guidelines [React + TypeScript + Tailwind CSS Guidelines]
+
+## Basic Principles
+
+- Use functional components with React hooks.
+- Ensure strict TypeScript typing for all components and props.
+- Follow the Separation of Concerns:
+  - UI logic in components.
+  - Business logic in hooks or services.
+- Keep components small and reusable.
+- Minimize prop drilling—use context or state management when necessary.
+- Optimize performance using:
+  - useMemo for expensive calculations.
+  - useCallback for stable function references.
+  - Lazy loading and dynamic imports for heavy components.
+- Use React Query for API data fetching where applicable.
+- Handle side effects properly using useEffect and cleanup functions.
+- Implement error boundaries for critical UI components.
+
+## Nomenculture
+
+- Use PascalCase for components and hooks.
+- Use camelCase for props, variables, and functions.
+- Use kebab-case for file and directory names.
+- Use handleX for event handlers (e.g., handleSubmit).
+- Use useX for custom hooks (e.g., useChatHistory).
+- Name components descriptively based on their purpose.
+
+## Component Structure
+
+### Atomic Design principles:
+
+- Divide components into atoms, molecules, and organisms.
+- Keep layout components separate from business logic.
+
+## Folder Structure Guidelines
+
+src/
+│── components/ # Reusable UI components
+│── hooks/ # Custom hooks
+│── pages/ # Route-based components
+│── services/ # API calls and business logic
+│── context/ # Global state management
+│── utils/ # Helper functions
+│── styles/ # Tailwind utility overrides
+
+- Separate styled components and JSX structure.
+- Extract utility functions to helper files.
+- Use default exports for components and named exports for utilities.
+
+## Tailwind CSS Best Practices
+
+- Use utility-first approach.
+- Extract reusable styles into @apply classes when necessary.
+- Keep classNames short and meaningful.
+- Use clsx or classnames for conditional styling.
+- Use theme() function to ensure consistency.
+- Prefer flex, grid, and gap over margin for spacing.
+- Minimize inline styles—use Tailwind classes instead.
+- Ensure dark mode compatibility using dark: variants.
+
+## State Management
+
+### Local State:
+
+- useState for simple UI interactions.
+- useReducer for complex state logic.
+
+### Global State:
+
+- Use React Context sparingly.
+- Consider Zustand or Redux Toolkit for scalable state management.
+
+### API State:
+
+- Use React Query or SWR for server-state management.
+- Implement caching and pagination where needed.
+
+## API Integration
+
+- Use Axios or Fetch API with a custom wrapper.
+- Create a services/api.ts file for API requests.
+- Handle loading, success, and error states in UI.
+- Implement retries and error handling using try/catch.
+
+## Performance Optimization
+
+- Avoid unnecessary re-renders using React.memo.
+- Use useDeferredValue and useTransition for responsive UI.
+- Debounce expensive operations like search filtering.
+- Use lazy loading (React.lazy and Suspense) for heavy components.
+
+## Accessibility (a11y)
+
+- Ensure semantic HTML structure.
+- Use aria- attributes for screen readers.
+- Provide keyboard navigation support.
+- Ensure color contrast meets WCAG standards.
+
+## Testing
+
+- Use Jest + React Testing Library for unit tests.
+- Write integration tests for API calls.
+- Use Cypress for end-to-end (E2E) testing.
