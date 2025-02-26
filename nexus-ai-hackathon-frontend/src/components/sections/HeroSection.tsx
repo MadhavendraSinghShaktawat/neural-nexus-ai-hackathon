@@ -10,6 +10,10 @@ export const HeroSection: React.FC = () => {
   const handleStartSession = () => {
     navigate('/chat');
   };
+  
+  const handleStartVideoChat = () => {
+    navigate('/video-chat');
+  };
 
   return (
     <section className="pt-20 md:pt-32 pb-16 relative overflow-hidden" id="home">
@@ -37,6 +41,12 @@ export const HeroSection: React.FC = () => {
                 className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-primary-500 text-white font-semibold rounded-full hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/30 transition-all"
               >
                 Start Session
+              </button>
+              <button 
+                onClick={handleStartVideoChat}
+                className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-purple-500 text-white font-semibold rounded-full hover:bg-purple-600 hover:shadow-lg hover:shadow-purple-500/30 transition-all"
+              >
+                Video Chat
               </button>
               <a 
                 href="#features"

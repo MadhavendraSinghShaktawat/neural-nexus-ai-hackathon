@@ -11,14 +11,18 @@
   },
   "dependencies": {
     "@heroicons/react": "^2.2.0",
+    "@react-three/drei": "^9.88.0",
+    "@react-three/fiber": "^8.13.6",
     "classnames": "^2.5.1",
     "framer-motion": "^12.4.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^6.29.0",
-    "tailwind-scrollbar": "^3.0.0"
+    "tailwind-scrollbar": "^3.0.0",
+    "three": "^0.173.0"
   },
   "devDependencies": {
+    "@types/node": "^22.13.5",
     "@types/react": "^18.2.55",
     "@types/react-dom": "^18.2.19",
     "@vitejs/plugin-react": "^4.2.1",

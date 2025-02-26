@@ -100,6 +100,11 @@ export const ChatPage: React.FC = () => {
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   const synthRef = useRef<SpeechSynthesis | null>(null);
 
+  // Add these new state variables
+  const [continuousListening, setContinuousListening] = useState(false);
+  const [silenceTimer, setSilenceTimer] = useState<ReturnType<typeof setTimeout> | null>(null);
+  const lastSpeechRef = useRef<number>(0);
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -204,13 +209,18 @@ export const ChatPage: React.FC = () => {
       recognitionRef.current = new SpeechRecognitionAPI();
       
       if (recognitionRef.current) {
-        recognitionRef.current.continuous = false;
+        recognitionRef.current.continuous = true; // Enable continuous mode
         recognitionRef.current.interimResults = true;
         recognitionRef.current.lang = 'en-US';
         
         recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-          const transcript = event.results[0][0].transcript;
+          // Get the latest result
+          const resultIndex = event.results.length - 1;
+          const transcript = event.results[resultIndex][0].transcript;
+          
+          // Update the input field
           setInputMessage(transcript);
+          lastSpeechRef.current = Date.now();
           
           // Auto-adjust textarea height
           if (inputRef.current) {
@@ -218,26 +228,63 @@ export const ChatPage: React.FC = () => {
             inputRef.current.style.height = `${Math.min(inputRef.current.scrollHeight, 120)}px`;
           }
           
-          // If this is a final result, auto-send after a short delay
-          if (event.results[0].isFinal) {
-            // Wait a moment to ensure the user has finished speaking
-            setTimeout(() => {
-              if (transcript.trim()) {
+          // If this is a final result and we detect a pause
+          if (event.results[resultIndex].isFinal && continuousListening) {
+            // Clear any existing timer
+            if (silenceTimer) {
+              clearTimeout(silenceTimer);
+            }
+            
+            // Set a new timer to detect silence
+            const timer = setTimeout(() => {
+              // If there's something to send and we haven't spoken for a while
+              if (transcript.trim() && Date.now() - lastSpeechRef.current > 1500) {
                 // Create a synthetic form submit event
                 const formEvent = new Event('submit', { cancelable: true }) as unknown as React.FormEvent;
                 handleSendMessage(formEvent);
+                
+                // Clear the input after sending
+                setInputMessage('');
+                
+                // Restart recognition for the next utterance
+                if (recognitionRef.current && continuousListening) {
+                  try {
+                    recognitionRef.current.stop();
+                    // Recognition will restart via onend handler
+                  } catch (e) {
+                    console.error('Error stopping recognition:', e);
+                  }
+                }
               }
-            }, 1000); // 1 second delay to ensure user has finished speaking
+            }, 1500); // 1.5 second silence detection
+            
+            setSilenceTimer(timer);
           }
         };
         
         recognitionRef.current.onend = () => {
-          setIsListening(false);
+          // If we're in continuous mode, restart recognition
+          if (continuousListening) {
+            try {
+              recognitionRef.current?.start();
+            } catch (e) {
+              console.error('Error restarting recognition:', e);
+              setIsListening(false);
+              setContinuousListening(false);
+            }
+          } else {
+            setIsListening(false);
+          }
         };
         
         recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
           console.error('Speech recognition error', event.error);
-          setIsListening(false);
+          
+          // Only stop completely on fatal errors
+          if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+            setIsListening(false);
+            setContinuousListening(false);
+          }
         };
         
         setSpeechEnabled(true);
@@ -258,17 +305,34 @@ export const ChatPage: React.FC = () => {
       if (synthRef.current && synthRef.current.speaking) {
         synthRef.current.cancel();
       }
+      
+      // Clear any pending timers
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+      }
     };
   }, []);
 
+  // Update the voice input handler to toggle continuous mode
   const handleVoiceInput = () => {
     if (!recognitionRef.current) return;
     
     if (isListening) {
+      // Stop listening
       recognitionRef.current.abort();
       setIsListening(false);
+      setContinuousListening(false);
+      
+      // Clear any pending silence timers
+      if (silenceTimer) {
+        clearTimeout(silenceTimer);
+        setSilenceTimer(null);
+      }
     } else {
+      // Start continuous listening mode
       setIsListening(true);
+      setContinuousListening(true);
+      lastSpeechRef.current = Date.now();
       recognitionRef.current.start();
     }
   };
@@ -590,8 +654,8 @@ export const ChatPage: React.FC = () => {
                 className={classNames(
                   "absolute right-3 bottom-3 p-1.5 rounded-full transition-colors",
                   isListening 
-                    ? "bg-primary-100 text-primary-500 animate-pulse" 
-                    : "text-gray-400 hover:text-gray-600",
+                    ? "bg-primary-500 text-white animate-pulse" 
+                    : "text-gray-400 hover:text-gray-600 hover:bg-gray-100",
                   "disabled:opacity-50 disabled:cursor-not-allowed"
                 )}
                 aria-label={isListening ? "Stop listening" : "Voice input"}
