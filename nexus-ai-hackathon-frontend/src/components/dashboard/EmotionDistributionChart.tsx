@@ -31,14 +31,11 @@ const EmotionDistributionChart: React.FC<EmotionDistributionChartProps> = ({ dis
   }));
 
   // Custom tooltip
-  const CustomTooltip = ({ active, payload, label }: any) => {
+  const CustomTooltip = ({ active, payload }: any) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-lg shadow-md border border-gray-200">
-          <p className="font-semibold">{payload[0].payload.label} ({payload[0].payload.rating}/10)</p>
-          <p className="text-sm">
-            Occurrences: <span className="font-medium">{payload[0].value}</span>
-          </p>
+        <div className="bg-white p-2 border border-gray-200 shadow-sm rounded-md">
+          <p className="text-sm font-medium">{`${payload[0].name}: ${payload[0].value}%`}</p>
         </div>
       );
     }

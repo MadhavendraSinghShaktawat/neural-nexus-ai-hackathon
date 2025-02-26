@@ -18,9 +18,7 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
   dateRange,
   healthData
 }) => {
-  const [reportType, setReportType] = useState<'summary' | 'detailed'>('summary');
-  const [includeCharts, setIncludeCharts] = useState<boolean>(true);
-  const [includeRecommendations, setIncludeRecommendations] = useState<boolean>(true);
+  const [reportType] = useState<'summary' | 'detailed'>('summary');
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [reportGenerated, setReportGenerated] = useState<boolean>(false);
   const [includeHealthData, setIncludeHealthData] = useState<boolean>(true);
@@ -205,7 +203,7 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
       }
       
       // Add recommendations if included
-      if (includeRecommendations && moodData.recommendations) {
+      if (moodData.recommendations) {
         // Check if we need a new page
         if (yPosition > 230) {
           doc.addPage();
@@ -217,7 +215,7 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
         yPosition += 10;
         
         // Add each recommendation
-        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
         moodData.recommendations.forEach((rec: any, index: number) => {
           // Check if we need a new page
           if (yPosition > 250) {
@@ -225,11 +223,10 @@ const GenerateReportModal: React.FC<GenerateReportModalProps> = ({
             yPosition = 20;
           }
           
-          doc.setFont(undefined, 'bold');
           doc.text(`${index + 1}. ${rec.title}`, 20, yPosition);
           yPosition += 7;
           
-          doc.setFont(undefined, 'normal');
+          doc.setFont('helvetica', 'normal');
           
           // Split long descriptions into multiple lines
           const descLines = doc.splitTextToSize(rec.description, pageWidth - 40);

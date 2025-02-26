@@ -40,14 +40,14 @@ const RecommendationsCard: React.FC<RecommendationsCardProps> = ({ moodData }) =
     // Check for common triggers
     if (moodData.topTags.length > 0) {
       const negativeEmotions = ['stressed', 'anxious', 'sad', 'angry', 'tired', 'frustrated', 'lonely'];
-      const foundNegativeTags = moodData.topTags.filter(item => 
+      const foundNegativeTags = moodData.topTags.filter((item: any) =>
         negativeEmotions.includes(item.tag.toLowerCase())
       );
       
       if (foundNegativeTags.length > 0) {
         recommendations.push({
           title: "Address common triggers",
-          description: `Your child frequently mentions feeling ${foundNegativeTags.map(t => t.tag.toLowerCase()).join(', ')}. Consider discussing these feelings.`,
+          description: `Your child frequently mentions feeling ${foundNegativeTags.map((t: any) => t.tag.toLowerCase()).join(', ')}. Consider discussing these feelings.`,
           priority: "medium"
         });
       }

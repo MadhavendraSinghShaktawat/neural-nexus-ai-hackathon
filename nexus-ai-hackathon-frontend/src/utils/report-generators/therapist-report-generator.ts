@@ -33,7 +33,6 @@ export const generateTherapistReport = ({
   // Create a new PDF document
   const doc = new jsPDF();
   const pageWidth = doc.internal.pageSize.getWidth();
-  const pageHeight = doc.internal.pageSize.getHeight();
   
   // Add title
   doc.setFontSize(20);
