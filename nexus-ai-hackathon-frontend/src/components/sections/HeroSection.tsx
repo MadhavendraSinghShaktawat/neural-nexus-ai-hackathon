@@ -2,8 +2,15 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { BeeIcon } from '../ui/Icons';
 import { DecorativeElements } from '../ui/DecorativeElements';
+import { useNavigate } from 'react-router-dom';
 
 export const HeroSection: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleStartSession = () => {
+    navigate('/chat');
+  };
+
   return (
     <section className="pt-20 md:pt-32 pb-16 relative overflow-hidden" id="home">
       <div className="container mx-auto px-4">
@@ -25,12 +32,18 @@ export const HeroSection: React.FC = () => {
               and feel better every day with AI-powered support.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <button className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-primary-500 text-white font-semibold rounded-full hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/30 transition-all">
-                Get Started
+              <button 
+                onClick={handleStartSession}
+                className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-primary-500 text-white font-semibold rounded-full hover:bg-primary-600 hover:shadow-lg hover:shadow-primary-500/30 transition-all"
+              >
+                Start Session
               </button>
-              <button className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-white text-gray-800 font-semibold rounded-full border-2 border-gray-200 hover:border-primary-500 hover:shadow-lg transition-all">
+              <a 
+                href="#features"
+                className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-white text-gray-800 font-semibold rounded-full border-2 border-gray-200 hover:border-primary-500 hover:shadow-lg transition-all"
+              >
                 Learn More
-              </button>
+              </a>
             </div>
           </motion.div>
           <motion.div
