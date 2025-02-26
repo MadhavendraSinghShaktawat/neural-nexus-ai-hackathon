@@ -3,6 +3,7 @@ import cors from 'cors';
 import { moodRouter } from './modules/mood/mood.controller';
 import { voiceRouter } from './modules/voice/voice.controller';
 import expressionRoutes from './modules/expression/expression.routes';
+import { chatRoutes } from './modules/chat/chat.routes';
 import { logger } from './config/logger';
 
 // Create Express app
@@ -32,6 +33,7 @@ app.get('/health', (_req: Request, res: Response) => {
 app.use('/moods', moodRouter);
 app.use('/api/voice', voiceRouter);
 app.use('/api/expression', expressionRoutes);
+app.use('/api/chat', chatRoutes);
 
 // Test route for expression API
 app.get('/api/expression-test', (_req: Request, res: Response) => {
