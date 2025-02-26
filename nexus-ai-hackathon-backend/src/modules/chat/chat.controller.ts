@@ -1,6 +1,8 @@
 import { Request, Response, NextFunction } from 'express';
 import { ChatService } from './chat.service';
 import { ChatRequestDto, ChatResponseDto } from './dto/chat-request.dto';
+import { logger } from '../../config/logger';
+import { ChatMessageDto } from './dto/chat-message.dto';
 
 export class ChatController {
   private readonly chatService: ChatService;
@@ -66,6 +68,32 @@ export class ChatController {
       });
     } catch (err) {
       next(err);
+    }
+  }
+
+  public async handleChatMessage(req: Request, res: Response): Promise<void> {
+    try {
+      const chatMessageDto: ChatMessageDto = req.body;
+      
+      // Validate request body
+      if (!chatMessageDto.userId || !chatMessageDto.message) {
+        res.status(400).json({ error: 'userId and message are required fields' });
+        return;
+      }
+      
+      // Process the chat message
+      const result = await this.chatService.processChatMessage({
+        userId: chatMessageDto.userId,
+        message: chatMessageDto.message
+      });
+      
+      res.status(200).json(result);
+    } catch (error) {
+      logger.error('Error processing chat message', { error });
+      res.status(500).json({ 
+        error: 'An error occurred while processing your message',
+        message: 'Please try again later'
+      });
     }
   }
 } 

@@ -1,55 +1,109 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
-import { createChatPrompt } from './prompt-template';
-import { config } from '../config/env.config';
+import { config } from '../config/config';
+import { logger } from '../config/logger';
+
+export interface GeminiRequestParams {
+  message: string;
+  history?: Array<{ role: 'user' | 'model'; content: string }>;
+}
+
+export interface GeminiResponse {
+  response: string;
+  success: boolean;
+}
 
 export class GeminiService {
-  private readonly genAI: GoogleGenerativeAI;
-  private readonly model: string = 'gemini-pro';
-  private readonly maxRetries: number = 3;
-  private readonly retryDelay: number = 1000; // 1 second
-
+  private genAI: GoogleGenerativeAI;
+  private model: any;
+  
   constructor() {
-    if (!config.geminiApiKey) {
-      throw new Error('GEMINI_API_KEY is not set in environment variables');
+    if (!config.GEMINI_API_KEY) {
+      throw new Error('GEMINI_API_KEY is not defined in environment variables');
     }
-    this.genAI = new GoogleGenerativeAI(config.geminiApiKey);
+    
+    this.genAI = new GoogleGenerativeAI(config.GEMINI_API_KEY);
+    this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-pro' });
+    
+    logger.info('Gemini API initialized with model: gemini-1.5-pro');
   }
-
-  private async delay(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
-  }
-
-  private getFallbackResponse(context: string): string {
-    // Provide helpful fallback responses based on common scenarios
-    if (context.toLowerCase().includes('exhausted') || context.toLowerCase().includes('tired')) {
-      return "I understand you're feeling exhausted. Here are some quick strategies: 1) Take a 10-minute power nap, 2) Get some fresh air, 3) Drink water and have a light snack, 4) Do some light stretching. Remember to take regular breaks to maintain your energy levels.";
-    }
-    if (context.toLowerCase().includes('focus') || context.toLowerCase().includes('concentrate')) {
-      return "To help with focus: 1) Break your work into 25-minute chunks with 5-minute breaks, 2) Remove distractions from your workspace, 3) Use background white noise if it helps, 4) Stay hydrated and have healthy snacks nearby.";
-    }
-    return "I apologize for the technical difficulty. Here are some general well-being strategies: 1) Take deep breaths, 2) Step away for a short break, 3) Stretch your body, 4) Stay hydrated. How are you feeling right now?";
-  }
-
-  public async generateResponse(message: string): Promise<string> {
-    let lastError: Error | null = null;
-
-    for (let attempt = 1; attempt <= this.maxRetries; attempt++) {
-      try {
-        const model = this.genAI.getGenerativeModel({ model: this.model });
-        const prompt = createChatPrompt(message, '');
-        const result = await model.generateContent(prompt);
-        const response = result.response;
-        return response.text();
-      } catch (error) {
-        console.error(`Attempt ${attempt} failed:`, error);
-        lastError = error as Error;
-        if (attempt < this.maxRetries) {
-          await this.delay(this.retryDelay * attempt);
+  
+  /**
+   * Sends a message to the Gemini API and returns the response
+   * @param params - The request parameters including message and optional conversation history
+   * @returns The response from Gemini API
+   */
+  public async generateResponse(params: GeminiRequestParams): Promise<GeminiResponse> {
+    try {
+      const { message, history = [] } = params;
+      
+      logger.info('Sending request to Gemini API', { 
+        messageLength: message.length,
+        historyLength: history.length 
+      });
+      
+      // For simple requests without history, use a direct approach
+      if (history.length === 0) {
+        const result = await this.model.generateContent(message);
+        const response = result.response.text();
+        
+        logger.info('Gemini API response generated successfully', { responseLength: response.length });
+        return {
+          response,
+          success: true
+        };
+      }
+      
+      // For requests with history, use the chat approach
+      const chat = this.model.startChat({
+        history: history.map(msg => ({
+          role: msg.role,
+          parts: [{ text: msg.content }]
+        })),
+        generationConfig: {
+          temperature: 0.7,
+          topK: 40,
+          topP: 0.95,
+          maxOutputTokens: 1000,
         }
+      });
+      
+      // Send the message to Gemini
+      const result = await chat.sendMessage(message);
+      const response = result.response.text();
+      
+      logger.info('Gemini API response generated successfully', { responseLength: response.length });
+      return {
+        response,
+        success: true
+      };
+    } catch (error) {
+      logger.error('Error generating response from Gemini API', { 
+        error: error instanceof Error ? error.message : String(error),
+        stack: error instanceof Error ? error.stack : undefined
+      });
+      
+      // Try a fallback approach with a different model if the first one fails
+      try {
+        logger.info('Attempting fallback with gemini-1.0-pro model');
+        const fallbackModel = this.genAI.getGenerativeModel({ model: 'gemini-1.0-pro' });
+        const result = await fallbackModel.generateContent(params.message);
+        const response = result.response.text();
+        
+        logger.info('Fallback Gemini API response generated successfully');
+        return {
+          response,
+          success: true
+        };
+      } catch (fallbackError) {
+        logger.error('Fallback also failed', { 
+          error: fallbackError instanceof Error ? fallbackError.message : String(fallbackError)
+        });
+        
+        return {
+          response: 'I apologize for the technical difficulty. Here are some general well-being strategies: 1) Take deep breaths, 2) Step away for a short break, 3) Stretch your body, 4) Stay hydrated. How are you feeling right now?',
+          success: false
+        };
       }
     }
-
-    console.error('All retry attempts failed:', lastError);
-    return this.getFallbackResponse(message);
   }
 } 
