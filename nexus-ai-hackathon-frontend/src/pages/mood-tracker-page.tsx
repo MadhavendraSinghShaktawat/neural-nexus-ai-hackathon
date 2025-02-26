@@ -30,11 +30,13 @@ const SUGGESTED_TAGS = [
 const API_BASE_URL = 'http://localhost:3000/api';
 
 interface MoodEntry {
-  id: string;
+  _id: string;
+  userId: string;
   rating: number;
   description: string;
   tags: string[];
   createdAt: string;
+  __v?: number;
 }
 
 const MoodTrackerPage: React.FC = () => {
@@ -74,10 +76,17 @@ const MoodTrackerPage: React.FC = () => {
       }
       
       const data = await response.json();
-      setRecentMoods(data);
+      if (data && data.data && Array.isArray(data.data.moods)) {
+        setRecentMoods(data.data.moods);
+      } else {
+        console.error('Unexpected API response format:', data);
+        setRecentMoods([]);
+        setError('Received invalid data format from the server.');
+      }
     } catch (error) {
       console.error('Error fetching moods:', error);
       setError('Failed to load your mood history. Please try again later.');
+      setRecentMoods([]);
     } finally {
       setIsLoading(false);
     }
@@ -220,6 +229,14 @@ const MoodTrackerPage: React.FC = () => {
             <div className="flex-1">
               <h1 className="text-xl font-semibold text-gray-800">Mood Tracker</h1>
               <p className="text-sm text-gray-500">Track how you're feeling</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <button 
+                onClick={() => navigate('/mood-history')}
+                className="px-4 py-2 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition-colors"
+              >
+                View History
+              </button>
             </div>
           </div>
         </div>
@@ -431,7 +448,7 @@ const MoodTrackerPage: React.FC = () => {
             ) : (
               <div className="space-y-4">
                 {recentMoods.map((mood) => (
-                  <div key={mood.id} className="border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow">
+                  <div key={mood._id} className="border border-gray-100 rounded-xl p-4 hover:shadow-sm transition-shadow">
                     <div className="flex items-center gap-4">
                       <div 
                         className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
