@@ -274,3 +274,37 @@ Headers: X-Session-ID: <session-id>
 
 POST /api/voice/session/end
 Headers: X-Session-ID: <session-id>
+
+## Emotion Detection API
+
+### Detect User Emotion
+
+POST /api/expression/detect
+
+Analyzes user text input to determine the primary emotion expressed.
+
+**Request Body:**
+json
+{
+"text": "I'm feeling really frustrated with my progress lately"
+}
+
+**Success Response (200):**
+json
+{
+"success": true,
+"emotion": "angry",
+"confidence": 0.85,
+"details": "The message expresses frustration, which falls under the anger emotion category"
+}
+
+**Possible Emotions:**
+[happy,sad,angry,anxious,neutral,confused,excited,fearful]
+
+**Error Response (400):**
+
+json
+{
+"success": false,
+"error": "Text input is required"
+}
