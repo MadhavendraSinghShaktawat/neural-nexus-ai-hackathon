@@ -155,11 +155,15 @@ const MoodTrackerPage: React.FC = () => {
     try {
       setIsSubmitting(true);
       
+      // Prepare the mood data
       const moodData = {
+        userId: 'default-user', // You might want to replace this with actual user ID
         rating: moodRating,
         description: description.trim(),
         tags: selectedTags
       };
+      
+      console.log('Sending mood data:', moodData);
       
       const response = await fetch(`${API_BASE_URL}/moods`, {
         method: 'POST',
@@ -170,23 +174,27 @@ const MoodTrackerPage: React.FC = () => {
       });
       
       if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        console.error('API error response:', errorData);
         throw new Error(`API Error: ${response.status}`);
       }
       
-      // Reset form
+      // Reset form after successful submission
+      setMoodRating(7);
       setDescription('');
       setSelectedTags([]);
+      setCustomTag('');
       
-      // Refresh mood history
-      await fetchRecentMoods();
+      // Refresh the recent moods list
+      fetchRecentMoods();
       
-      // Show success message or redirect
-      // For now, we'll just log success
       console.log('Mood saved successfully!');
       
+      // You might want to show a success message to the user
+      // For example, using a toast notification
     } catch (error) {
       console.error('Error saving mood:', error);
-      setError('Failed to save your mood. Please try again.');
+      // Show error message to the user
     } finally {
       setIsSubmitting(false);
     }

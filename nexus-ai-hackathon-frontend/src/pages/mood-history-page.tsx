@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeftIcon, CalendarIcon, ChartBarIcon } from '@heroicons/react/24/outline';
 import { useNavigate } from 'react-router-dom';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts';
@@ -244,7 +244,6 @@ const MoodHistoryPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
@@ -263,9 +262,13 @@ const MoodHistoryPage: React.FC = () => {
         </div>
       </header>
 
-      {/* Main Content */}
-      <div className="container mx-auto px-4 pt-24 pb-16">
-        <div className="max-w-4xl mx-auto">
+      <div className="container mx-auto px-4 pt-24 pb-32">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="max-w-4xl mx-auto"
+        >
           {/* View Toggle */}
           <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
             <div className="flex flex-wrap gap-4">
@@ -644,7 +647,7 @@ const MoodHistoryPage: React.FC = () => {
               Add New Mood Entry
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     </div>
   );
