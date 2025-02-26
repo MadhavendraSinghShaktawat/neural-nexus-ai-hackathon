@@ -30,7 +30,7 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // API Routes
-app.use('/moods', moodRouter);
+app.use('/api/moods', moodRouter);
 app.use('/api/voice', voiceRouter);
 app.use('/api/expression', expressionRoutes);
 app.use('/api/chat', chatRoutes);

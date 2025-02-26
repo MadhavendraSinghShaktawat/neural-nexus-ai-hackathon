@@ -48,12 +48,12 @@ export const HeroSection: React.FC = () => {
               >
                 Video Chat
               </button>
-              <a 
-                href="#features"
-                className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-white text-gray-800 font-semibold rounded-full border-2 border-gray-200 hover:border-primary-500 hover:shadow-lg transition-all"
+              <button 
+                onClick={() => navigate('/mood-tracker')}
+                className="w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 bg-yellow-400 text-gray-800 font-semibold rounded-full hover:bg-yellow-500 hover:shadow-lg hover:shadow-yellow-400/30 transition-all"
               >
-                Learn More
-              </a>
+                Mood Tracker
+              </button>
             </div>
           </motion.div>
           <motion.div
