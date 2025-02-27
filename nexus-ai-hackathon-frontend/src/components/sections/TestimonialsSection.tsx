@@ -6,19 +6,19 @@ const testimonials = [
     name: "Sarah Johnson",
     role: "Parent",
     comment: "My kids love learning with HappyBuddy! It's made education fun for them.",
-    avatar: "/avatars/sarah.jpg",
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSDmNMLztpvMjXLqxiupAzsDmDsJWW6XdY1AA&s",
   },
   {
     name: "Michael Chen",
     role: "Teacher",
     comment: "The progress tracking features help me understand my students' development.",
-    avatar: "/avatars/michael.jpg",
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRkZUUzPWexwYFKYLr3eR81HIW6UGWZcAKoSQ&s",
   },
   {
     name: "Emily Williams",
     role: "Education Specialist",
     comment: "Best educational app we've tried. The games are both fun and educational.",
-    avatar: "/avatars/emily.jpg",
+    avatar: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSCXMkhlEBEnBlabBSIthNS7AeMGd6ry1vQtg&s",
   },
 ];
 
