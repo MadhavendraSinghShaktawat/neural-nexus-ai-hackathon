@@ -71,7 +71,7 @@ export const HeroSection: React.FC = () => {
               <div className="relative rounded-xl md:rounded-2xl overflow-hidden bg-white shadow-lg">
                 <div className="aspect-[4/3] bg-gradient-to-br from-primary-500/10 to-secondary-500/10 p-4 md:p-6">
                   <img
-                    src="./public/model.webp"
+                    src="https://res.cloudinary.com/dugzwn4dz/image/upload/v1740639949/model_ck3k2q.webp"
                     alt="HappyBuddy App Interface"
                     className="w-full h-full object-cover rounded-lg md:rounded-xl shadow-lg"
                   />

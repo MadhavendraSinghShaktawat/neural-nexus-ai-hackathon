@@ -27,7 +27,7 @@ const LandingPage: React.FC = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                 <div className="bg-white rounded-xl shadow-lg overflow-hidden">
                   <img 
-                    src="./public/parent-dashboard.png" 
+                    src="https://res.cloudinary.com/dugzwn4dz/image/upload/v1740639243/mtpchqnqsqsikljces5q.webp" 
                     alt="Parent Dashboard Preview" 
                     className="w-full h-auto"
                   />
