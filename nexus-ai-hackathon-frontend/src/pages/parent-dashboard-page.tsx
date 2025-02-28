@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import DashboardLayout from '../components/dashboard/DashboardLayout';
 import MoodSummaryCard from '../components/dashboard/MoodSummaryCard';
 import MoodTrendsChart from '../components/dashboard/MoodTrendsChart';
@@ -11,6 +11,7 @@ import GenerateReportModal from '../components/dashboard/GenerateReportModal';
 import TherapistReportModal from '../components/dashboard/TherapistReportModal';
 import HealthMonitorModal from '../components/dashboard/HealthMonitorModal';
 import { UserIcon, HeartIcon } from '@heroicons/react/24/outline';
+import { FaChartLine, FaCalendarAlt, FaComments, FaClipboardList, FaExclamationTriangle } from 'react-icons/fa';
 
 // API endpoint for future use
 // const API_BASE_URL = 'http://localhost:3000/api';
@@ -218,6 +219,24 @@ const ParentDashboardPage: React.FC = () => {
             <MoodTrendsChart trendData={moodData.trendData} />
             <EmotionDistributionChart distribution={moodData.moodDistribution} />
           </div>
+
+          {/* Risk Analysis Card */}
+        <div className="bg-white rounded-lg shadow-md overflow-hidden">
+          <div className="bg-purple-500 px-4 py-3">
+            <h2 className="text-white text-lg font-semibold flex items-center">
+              <FaExclamationTriangle className="mr-2" /> Risk Analysis
+            </h2>
+          </div>
+          <div className="p-5">
+            <p className="text-gray-600 mb-4">Monitor behavioral patterns and identify potential risks.</p>
+            <Link 
+              to="/risk-analysis" 
+              className="inline-block bg-purple-500 hover:bg-purple-600 text-white font-medium py-2 px-4 rounded transition-colors"
+            >
+              View Risk Analysis
+            </Link>
+          </div>
+        </div>
           
           {/* Recent Activities */}
           <RecentActivitiesCard recentMoods={moodData.recentMoods} />
